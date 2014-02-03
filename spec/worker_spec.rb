@@ -72,6 +72,13 @@ describe Delayed::Worker do
     end
   end
 
+  context "worker per env" do
+    # TODO: create spec per env
+    it "has default environment" do
+      expect(Delayed::Worker.env).to eq('development')
+    end
+  end
+
   context "worker job reservation" do
     before do
       Delayed::Worker.exit_on_complete = true

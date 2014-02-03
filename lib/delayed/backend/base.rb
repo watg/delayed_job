@@ -10,7 +10,8 @@ module Delayed
         def enqueue(*args)
           options = {
             :priority => Delayed::Worker.default_priority,
-            :queue => Delayed::Worker.default_queue_name
+            :queue => Delayed::Worker.default_queue_name,
+            :env => Delayed::Worker.default_env_name
           }.merge!(args.extract_options!)
 
           options[:payload_object] ||= args.shift

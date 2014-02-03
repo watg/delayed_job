@@ -19,7 +19,8 @@ namespace :jobs do
       :min_priority => ENV['MIN_PRIORITY'],
       :max_priority => ENV['MAX_PRIORITY'],
       :queues => (ENV['QUEUES'] || ENV['QUEUE'] || '').split(','),
-      :quiet => false
+      :quiet => false,
+      :env => (ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development')
     }
   end
 

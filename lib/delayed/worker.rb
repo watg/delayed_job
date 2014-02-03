@@ -15,14 +15,20 @@ module Delayed
     DEFAULT_DEFAULT_PRIORITY = 0
     DEFAULT_DELAY_JOBS       = true
     DEFAULT_QUEUES           = []
+    DEFAULT_ENV              = 'development'
     DEFAULT_READ_AHEAD       = 5
 
     cattr_accessor :min_priority, :max_priority, :max_attempts, :max_run_time,
       :default_priority, :sleep_delay, :logger, :delay_jobs, :queues,
-      :read_ahead, :plugins, :destroy_failed_jobs, :exit_on_complete
+      :read_ahead, :plugins, :destroy_failed_jobs, :exit_on_complete, :env
 
     # Named queue into which jobs are enqueued by default
     cattr_accessor :default_queue_name
+
+    # Default env based on current running environment
+    def self.default_env_name
+      (ENV['RAILS_ENV'] || ENV['RACK_ENV'] || DEFAULT_ENV)
+    end
 
     cattr_reader :backend
 
@@ -36,6 +42,7 @@ module Delayed
       self.default_priority = DEFAULT_DEFAULT_PRIORITY
       self.delay_jobs       = DEFAULT_DELAY_JOBS
       self.queues           = DEFAULT_QUEUES
+      self.env              = DEFAULT_ENV
       self.read_ahead       = DEFAULT_READ_AHEAD
     end
 
@@ -109,7 +116,7 @@ module Delayed
       @quiet = options.has_key?(:quiet) ? options[:quiet] : true
       @failed_reserve_count = 0
 
-      [:min_priority, :max_priority, :sleep_delay, :read_ahead, :queues, :exit_on_complete].each do |option|
+      [:min_priority, :max_priority, :sleep_delay, :read_ahead, :queues, :exit_on_complete, :env].each do |option|
         self.class.send("#{option}=", options[option]) if options.has_key?(option)
       end
 
