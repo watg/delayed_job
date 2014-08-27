@@ -1,13 +1,13 @@
 Delayed::Job
 ============
 [![Gem Version](https://badge.fury.io/rb/delayed_job.png)][gem]
-[![Build Status](https://secure.travis-ci.org/collectiveidea/delayed_job.png?branch=master)][travis]
+[![Build Status](https://travis-ci.org/collectiveidea/delayed_job.png?branch=master)][travis]
 [![Dependency Status](https://gemnasium.com/collectiveidea/delayed_job.png?travis)][gemnasium]
 [![Code Climate](https://codeclimate.com/github/collectiveidea/delayed_job.png)][codeclimate]
 [![Coverage Status](https://coveralls.io/repos/collectiveidea/delayed_job/badge.png?branch=master)][coveralls]
 
 [gem]: https://rubygems.org/gems/delayed_job
-[travis]: http://travis-ci.org/collectiveidea/delayed_job
+[travis]: https://travis-ci.org/collectiveidea/delayed_job
 [gemnasium]: https://gemnasium.com/collectiveidea/delayed_job
 [codeclimate]: https://codeclimate.com/github/collectiveidea/delayed_job
 [coveralls]: https://coveralls.io/r/collectiveidea/delayed_job
@@ -231,7 +231,7 @@ Custom Jobs
 Jobs are simple ruby objects with a method called perform. Any object which responds to perform can be stuffed into the jobs table. Job objects are serialized to yaml so that they can later be resurrected by the job runner.
 
 ```ruby
-class NewsletterJob < Struct.new(:text, :emails)
+NewsletterJob = Struct.new(:text, :emails) do
   def perform
     emails.each { |e| NewsletterMailer.deliver_text_to_email(text, e) }
   end
@@ -241,7 +241,7 @@ Delayed::Job.enqueue NewsletterJob.new('lorem ipsum...', Customers.find(:all).co
 ```
 To set a per-job max attempts that overrides the Delayed::Worker.max_attempts you can define a max_attempts method on the job
 ```ruby
-class NewsletterJob < Struct.new(:text, :emails)
+NewsletterJob = Struct.new(:text, :emails) do
   def perform
     emails.each { |e| NewsletterMailer.deliver_text_to_email(text, e) }
   end
@@ -344,6 +344,8 @@ Cleaning up
 ===========
 You can invoke `rake jobs:clear` to delete all jobs in the queue.
 
-Mailing List
-============
-Join us on the [mailing list](http://groups.google.com/group/delayed_job)
+Having problems?
+================
+Good places to get help are:
+* [Google Groups](http://groups.google.com/group/delayed_job) where you can join our mailing list.
+* [StackOverflow](http://stackoverflow.com/questions/tagged/delayed-job)

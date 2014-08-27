@@ -1,3 +1,13 @@
+4.0.2 - 2014-06-24
+==================
+* Add support for RSpec 3
+
+4.0.1 - 2014-04-12
+==================
+* Update gemspec for Rails 4.1
+* Make logger calls more universal
+* Check that records are persisted? instead of new_record?
+
 4.0.0 - 2013-07-30
 ==================
 * Rails 4 compatibility

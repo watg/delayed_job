@@ -97,13 +97,60 @@ describe Delayed::Worker do
       expect(Delayed::Job).to receive(:reserve).exactly(10).times.and_raise(Exception)
       worker = Delayed::Worker.new
       9.times { worker.work_off }
-      expect(lambda { worker.work_off }).to raise_exception
+      expect(lambda { worker.work_off }).to raise_exception Delayed::FatalBackendError
     end
 
     it "allows the backend to attempt recovery from reservation errors" do
       expect(Delayed::Job).to receive(:reserve).and_raise(Exception)
       expect(Delayed::Job).to receive(:recover_from).with(instance_of(Exception))
       Delayed::Worker.new.work_off
+    end
+  end
+
+  context "#say" do
+    before(:each) do
+      @worker = Delayed::Worker.new
+      @worker.name = 'ExampleJob'
+      @worker.logger = double('job')
+      time = Time.now
+      allow(Time).to receive(:now).and_return(time)
+      @text = "Job executed"
+      @worker_name = "[Worker(ExampleJob)]"
+      @expected_time = time.strftime('%FT%T%z')
+    end
+
+    after(:each) do
+      @worker.logger = nil
+    end
+
+    shared_examples_for "a worker which logs on the correct severity" do |severity|
+      it "logs a message on the #{severity[:level].upcase} level given a string" do
+        expect(@worker.logger).to receive(:send).
+          with(severity[:level], "#{@expected_time}: #{@worker_name} #{@text}")
+        @worker.say(@text, severity[:level])
+      end
+
+      it "logs a message on the #{severity[:level].upcase} level given a fixnum" do
+        expect(@worker.logger).to receive(:send).
+          with(severity[:level], "#{@expected_time}: #{@worker_name} #{@text}")
+        @worker.say(@text, severity[:index])
+      end
+    end
+
+    severities = [ { index: 0, level: "debug" },
+                   { index: 1, level: "info" },
+                   { index: 2, level: "warn" },
+                   { index: 3, level: "error" },
+                   { index: 4, level: "fatal" },
+                   { index: 5, level: "unknown" } ]
+    severities.each do |severity|
+      it_behaves_like "a worker which logs on the correct severity", severity
+    end
+
+    it "logs a message on the default log's level" do
+      expect(@worker.logger).to receive(:send).
+        with("info", "#{@expected_time}: #{@worker_name} #{@text}")
+      @worker.say(@text, Delayed::Worker::DEFAULT_LOG_LEVEL)
     end
   end
 end

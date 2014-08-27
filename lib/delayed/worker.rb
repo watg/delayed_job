@@ -7,8 +7,9 @@ require 'logger'
 require 'benchmark'
 
 module Delayed
+
   class Worker
-    DEFAULT_LOG_LEVEL        = Logger::INFO
+    DEFAULT_LOG_LEVEL        = 'info'
     DEFAULT_SLEEP_DELAY      = 5
     DEFAULT_MAX_ATTEMPTS     = 25
     DEFAULT_MAX_RUN_TIME     = 4.hours
@@ -232,7 +233,7 @@ module Delayed
         job.unlock
         job.save!
       else
-        job_say job, "REMOVED permanently because of #{job.attempts} consecutive failures", Logger::ERROR
+        job_say job, "REMOVED permanently because of #{job.attempts} consecutive failures", 'error'
         failed(job)
       end
     end
@@ -252,7 +253,13 @@ module Delayed
     def say(text, level = DEFAULT_LOG_LEVEL)
       text = "[Worker(#{name})] #{text}"
       puts text unless @quiet
-      logger.add level, "#{Time.now.strftime('%FT%T%z')}: #{text}" if logger
+      if logger
+        # TODO: Deprecate use of Fixnum log levels
+        if !level.is_a?(String)
+          level = Logger::Severity.constants.detect {|i| Logger::Severity.const_get(i) == level }.to_s.downcase
+        end
+        logger.send(level, "#{Time.now.strftime('%FT%T%z')}: #{text}")
+      end
     end
 
     def max_attempts(job)
@@ -263,7 +270,7 @@ module Delayed
 
     def handle_failed_job(job, error)
       job.last_error = "#{error.message}\n#{error.backtrace.join("\n")}"
-      job_say job, "FAILED (#{job.attempts} prior attempts) with #{error.class.name}: #{error.message}", Logger::ERROR
+      job_say job, "FAILED (#{job.attempts} prior attempts) with #{error.class.name}: #{error.message}", 'error'
       reschedule(job)
     end
 
